@@ -1,25 +1,3 @@
-(function () {
-  'use strict';
-
-  var cardBadgesCache = {};
-  var pluginPath = 'https://crowley38.github.io/Icons/';
-  var TMDB_IMAGE_URL = 'https://image.tmdb.org/t/p/h30'; 
-
-  var svgIcons = {
-    '4K': pluginPath + '4K.svg',
-    '2K': pluginPath + '2K.svg',
-    'FULL HD': pluginPath + 'FULL HD.svg',
-    'HD': pluginPath + 'HD.svg',
-    'HDR': pluginPath + 'HDR.svg',
-    'Dolby Vision': pluginPath + 'Dolby Vision.svg',
-    '7.1': pluginPath + '7.1.svg',
-    '5.1': pluginPath + '5.1.svg',
-    '4.0': pluginPath + '4.0.svg',
-    '2.0': pluginPath + '2.0.svg',
-    'DUB': pluginPath + 'DUB.svg',
-    'UKR': pluginPath + 'UKR.svg'
-  };
-
   function getStudioLogos(movie) {
     var html = '';
     if (movie && movie.production_companies) {
