@@ -6,32 +6,34 @@
         if (old) old.remove();
         if (!theme || theme === 'default') return;
 
-        var b = '.menu__item, .settings-folder, .settings-param, .selectbox-item, .full-start__button, .full-descr__tag, .player-panel .button, .custom-online-btn, .custom-torrent-btn, .main2-more-btn, .simple-button, .menu__version';
+        // Элементы, которые станут "карточками" в меню
+        var items = '.settings-param, .settings-folder, .selectbox-item';
+        
+        var b = '.menu__item, .full-start__button, .full-descr__tag, .player-panel .button, .custom-online-btn, .custom-torrent-btn, .main2-more-btn, .simple-button, .menu__version';
         var f = '.menu__item.focus, .menu__item.traverse, .menu__item.hover, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .full-start__button.focus, .full-descr__tag.focus, .player-panel .button.focus, .custom-online-btn.focus, .custom-torrent-btn.focus, .main2-more-btn.focus, .simple-button.focus, .menu__version.focus';
         var c = '.card.focus .card__view::after, .card.hover .card__view::after';
-        
-        // Стили для правого меню (добавлен border и box-shadow для ободка)
         var m = '.settings, .settings__content, .settings-input__content, .selectbox__content, .modal__content, .scroll';
-        var borderStyle = 'border-left: 3px solid '; // Ободок слева для правого меню
-        var shadowStyle = 'box-shadow: -5px 0 15px '; // Свечение влево
 
+        // Общие стили для рамок пунктов
+        var itemStyle = items + ' { border: 1px solid rgba(255,255,255,0.1) !important; margin-bottom: 8px !important; border-radius: 8px !important; transition: all 0.3s ease !important; background: rgba(255,255,255,0.03) !important; } ';
         var anim = 'body, ' + b + ', ' + m + ', .menu, .head { transition: all 0.4s ease !important; }';
 
+        // Цвета границ для каждой темы
         var themeCss = {
-            emerald_v1: 'body, ' + m + ' { background: #0c1619 !important; color: #dfdfdf !important; } .settings { ' + borderStyle + '#1a594d !important; ' + shadowStyle + 'rgba(26,89,77,0.3) !important; } ' + f + ' { background: linear-gradient(to right, #1a594d, #0e3652) !important; }',
-            emerald_v2: 'body, ' + m + ' { background: #112229 !important; } .settings { ' + borderStyle + '#26a483 !important; ' + shadowStyle + 'rgba(38,164,131,0.3) !important; } ' + f + ' { background: linear-gradient(90deg, #26a483, #125e8a) !important; }',
-            aurora: 'body, ' + m + ' { background: #0f2027 !important; color: #fff !important; } .settings { ' + borderStyle + '#aa4b6b !important; ' + shadowStyle + 'rgba(170,75,107,0.3) !important; } ' + f + ' { background: linear-gradient(90deg, #aa4b6b, #6b6b83, #3b8d99) !important; }',
-            netflix: 'body, ' + m + ' { background: #141414 !important; color: #fff !important; } .settings { ' + borderStyle + '#E50914 !important; ' + shadowStyle + 'rgba(229,9,20,0.4) !important; } ' + f + ' { background: #E50914 !important; }',
-            spotify: 'body, ' + m + ' { background: #121212 !important; color: #fff !important; } .settings { ' + borderStyle + '#1DB954 !important; ' + shadowStyle + 'rgba(29,185,84,0.3) !important; } ' + f + ' { background: #1DB954 !important; color: #000 !important; }',
-            cyberpunk: 'body, ' + m + ' { background: #09090e !important; color: #00f0ff !important; } .settings { ' + borderStyle + '#ff003c !important; ' + shadowStyle + 'rgba(255,0,60,0.5) !important; } ' + f + ' { background: linear-gradient(90deg, #ff003c, #00f0ff) !important; }',
-            amoled: 'body, ' + m + ' { background: #000000 !important; color: #fff !important; } .settings { ' + borderStyle + '#bb86fc !important; ' + shadowStyle + 'rgba(187,134,252,0.3) !important; } ' + f + ' { background: #bb86fc !important; color: #000 !important; }',
-            ocean: 'body, ' + m + ' { background: #050a14 !important; color: #64ffda !important; } .settings { ' + borderStyle + '#64ffda !important; ' + shadowStyle + 'rgba(100,255,218,0.3) !important; } ' + f + ' { background: rgba(100,255,218,0.2) !important; border: 1px solid #64ffda !important; }',
-            dark_mint: 'body, ' + m + ' { background: #050e0d !important; color: #fff !important; } .settings { ' + borderStyle + '#00b894 !important; } ' + f + ' { background: #00b894 !important; }',
-            mint: 'body, ' + m + ' { background: #122220 !important; color: #fff !important; } .settings { ' + borderStyle + '#2ecc71 !important; } ' + f + ' { background: #2ecc71 !important; }',
-            prime: 'body, ' + m + ' { background: #1e2b3c !important; color: #fff !important; } .settings { ' + borderStyle + '#00a8e1 !important; } ' + f + ' { background: #00a8e1 !important; }',
-            twitch: 'body, ' + m + ' { background: #0e0e10 !important; color: #efeff1 !important; } .settings { ' + borderStyle + '#9146FF !important; } ' + f + ' { background: #9146FF !important; }',
-            apple: 'body, ' + m + ' { background: #1c1c1e !important; color: #fff !important; } .settings { ' + borderStyle + 'rgba(255,255,255,0.5) !important; } ' + f + ' { background: rgba(255,255,255,0.2) !important; }',
-            hulu: 'body, ' + m + ' { background: #0f1210 !important; color: #fff !important; } .settings { ' + borderStyle + '#1ce783 !important; } ' + f + ' { background: #1ce783 !important; color: #000 !important; }'
+            emerald_v1: itemStyle + 'body, ' + m + ' { background: #0c1619 !important; color: #dfdfdf !important; } .settings { border-left: 3px solid #1a594d !important; } ' + items + ' { border-color: rgba(26,89,77,0.4) !important; } ' + f + ' { background: linear-gradient(to right, #1a594d, #0e3652) !important; border-color: #1a594d !important; }',
+            emerald_v2: itemStyle + 'body, ' + m + ' { background: #112229 !important; } .settings { border-left: 3px solid #26a483 !important; } ' + items + ' { border-color: rgba(38,164,131,0.4) !important; } ' + f + ' { background: linear-gradient(90deg, #26a483, #125e8a) !important; }',
+            aurora: itemStyle + 'body, ' + m + ' { background: #0f2027 !important; color: #fff !important; } .settings { border-left: 3px solid #aa4b6b !important; } ' + items + ' { border-color: rgba(170,75,107,0.4) !important; } ' + f + ' { background: linear-gradient(90deg, #aa4b6b, #6b6b83, #3b8d99) !important; }',
+            netflix: itemStyle + 'body, ' + m + ' { background: #141414 !important; color: #fff !important; } .settings { border-left: 3px solid #E50914 !important; } ' + items + ' { border-color: rgba(229,9,20,0.3) !important; } ' + f + ' { background: #E50914 !important; }',
+            spotify: itemStyle + 'body, ' + m + ' { background: #121212 !important; color: #fff !important; } .settings { border-left: 3px solid #1DB954 !important; } ' + items + ' { border-color: rgba(29,185,84,0.3) !important; } ' + f + ' { background: #1DB954 !important; color: #000 !important; }',
+            cyberpunk: itemStyle + 'body, ' + m + ' { background: #09090e !important; color: #00f0ff !important; } .settings { border-left: 3px solid #ff003c !important; } ' + items + ' { border-color: rgba(255,0,60,0.4) !important; } ' + f + ' { background: linear-gradient(90deg, #ff003c, #00f0ff) !important; }',
+            amoled: itemStyle + 'body, ' + m + ' { background: #000000 !important; color: #fff !important; } .settings { border-left: 3px solid #bb86fc !important; } ' + items + ' { border-color: rgba(187,134,252,0.3) !important; } ' + f + ' { background: #bb86fc !important; color: #000 !important; }',
+            ocean: itemStyle + 'body, ' + m + ' { background: #050a14 !important; color: #64ffda !important; } .settings { border-left: 3px solid #64ffda !important; } ' + items + ' { border-color: rgba(100,255,218,0.3) !important; } ' + f + ' { background: rgba(100,255,218,0.2) !important; border: 1px solid #64ffda !important; }',
+            dark_mint: itemStyle + 'body, ' + m + ' { background: #050e0d !important; color: #fff !important; } .settings { border-left: 3px solid #00b894 !important; } ' + items + ' { border-color: rgba(0,184,148,0.3) !important; } ' + f + ' { background: #00b894 !important; }',
+            mint: itemStyle + 'body, ' + m + ' { background: #122220 !important; color: #fff !important; } .settings { border-left: 3px solid #2ecc71 !important; } ' + items + ' { border-color: rgba(46,204,113,0.3) !important; } ' + f + ' { background: #2ecc71 !important; }',
+            prime: itemStyle + 'body, ' + m + ' { background: #1e2b3c !important; color: #fff !important; } .settings { border-left: 3px solid #00a8e1 !important; } ' + items + ' { border-color: rgba(0,168,225,0.3) !important; } ' + f + ' { background: #00a8e1 !important; }',
+            twitch: itemStyle + 'body, ' + m + ' { background: #0e0e10 !important; color: #efeff1 !important; } .settings { border-left: 3px solid #9146FF !important; } ' + items + ' { border-color: rgba(145,70,255,0.3) !important; } ' + f + ' { background: #9146FF !important; }',
+            apple: itemStyle + 'body, ' + m + ' { background: #1c1c1e !important; color: #fff !important; } .settings { border-left: 3px solid rgba(255,255,255,0.5) !important; } ' + items + ' { border-color: rgba(255,255,255,0.1) !important; } ' + f + ' { background: rgba(255,255,255,0.2) !important; }',
+            hulu: itemStyle + 'body, ' + m + ' { background: #0f1210 !important; color: #fff !important; } .settings { border-left: 3px solid #1ce783 !important; } ' + items + ' { border-color: rgba(28,231,131,0.3) !important; } ' + f + ' { background: #1ce783 !important; color: #000 !important; }'
         };
 
         if (themeCss[theme]) {
@@ -110,3 +112,4 @@
         });
     }
 })();
+
