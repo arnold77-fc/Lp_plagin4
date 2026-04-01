@@ -7901,63 +7901,73 @@
     }
  
 // =================================================================
-// APPLE TV QUALITY BADGES (APPENDED TO THE END)
+// APPLE TV QUALITY BADGES (COMPATIBLE VERSION)
 // =================================================================
-(function() {
-    // 1. Добавляем стили для иконок
-    var style = '<style>' +
-        '.applecation__quality-badges { display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap; }' +
-        '.applecation__badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; ' +
-        'font-size: 11px; font-weight: 700; padding: 1px 5px; border: 1.5px solid rgba(255, 255, 255, 0.4); ' +
-        'border-radius: 4px; color: rgba(255, 255, 255, 0.8); text-transform: uppercase; line-height: 1.2; background: transparent; }' +
-        '.applecation__badge--gold { color: #d4af37; border-color: #d4af37; }' +
-    '</style>';
-    $('body').append(style);
+(function () {
+    // 1. Добавляем стили (CSS)
+    var styleId = 'apple-tv-badges-style';
+    if (!document.getElementById(styleId)) {
+        var styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        styleTag.innerHTML = 
+            '.applecation__quality-badges { display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap; }' +
+            '.apple-badge { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; font-weight: 700; ' +
+            'padding: 1px 5px; border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 4px; ' +
+            'color: rgba(255, 255, 255, 0.8); text-transform: uppercase; line-height: 1.2; display: inline-block; }' +
+            '.apple-badge--gold { color: #d4af37; border-color: #d4af37; }';
+        document.body.appendChild(styleTag);
+    }
 
-    // 2. Слушаем событие завершения рендера карточки
-    Lampa.Listener.follow('full', function (e) {
-        if (e.type !== 'complite') return;
-        
-        var render = e.object && e.object.activity ? e.object.activity.render() : null;
-        var movie = e.data && e.data.movie;
-        if (!render || !movie) return;
+    // 2. Слушатель событий Lampa
+    if (window.Lampa && Lampa.Listener) {
+        Lampa.Listener.follow('full', function (e) {
+            if (e.type !== 'complite') return;
 
-        // Ждем небольшую паузу, чтобы основной шаблон успел отрисоваться
-        setTimeout(function() {
-            var badges = [];
+            var render = e.object && e.object.activity ? e.object.activity.render() : null;
+            var movie = e.data && e.data.movie;
             
-            // Логика определения меток (4K, HDR, 5.1)
-            var quality = (movie.quality_label || '').toLowerCase();
-            if (quality.includes('4k') || quality.includes('2160')) badges.push('4K');
-            else if (quality.includes('1080')) badges.push('HD');
+            if (!render || !movie) return;
 
-            if (movie.dv || quality.includes('dv') || quality.includes('vision')) {
-                badges.push('<span class="applecation__badge applecation__badge--gold">DV</span>');
-            } else if (movie.hdr || quality.includes('hdr')) {
-                badges.push('HDR');
-            }
-
-            var audio = (movie.sound_label || '').toLowerCase();
-            if (audio.includes('5.1')) badges.push('5.1');
-            else if (audio.includes('2.0')) badges.push('2.0');
-            else if (audio.includes('atmos')) badges.push('Atmos');
-
-            if (badges.length > 0) {
-                // Если контейнер для плашок уже есть в вашем шаблоне (.applecation__quality-badges)
-                var container = render.find('.applecation__quality-badges');
+            // Используем тайм-аут, чтобы основной код успел отрисовать свои блоки
+            setTimeout(function () {
+                var badges = [];
                 
-                // Если контейнера нет, создаем его после блока инфо
-                if (!container.length) {
-                    container = $('<div class="applecation__quality-badges"></div>');
-                    render.find('.applecation__info').after(container);
+                // Проверка Качества
+                var q = (movie.quality_label || '').toString().toLowerCase();
+                if (q.indexOf('4k') !== -1 || q.indexOf('2160') !== -1) badges.push('4K');
+                else if (q.indexOf('1080') !== -1) badges.push('HD');
+
+                // Проверка HDR / Dolby Vision
+                if (movie.dv || q.indexOf('dv') !== -1 || q.indexOf('vision') !== -1) {
+                    badges.push('<span class="apple-badge apple-badge--gold">DV</span>');
+                } else if (movie.hdr || q.indexOf('hdr') !== -1) {
+                    badges.push('HDR');
                 }
 
-                var html = badges.map(function(b) {
-                    return b.indexOf('<span') !== -1 ? b : '<span class="applecation__badge">' + b + '</span>';
-                }).join('');
-                
-                container.html(html).addClass('show');
-            }
-        }, 100);
-    });
+                // Проверка Звука
+                var s = (movie.sound_label || movie.audio || '').toString().toLowerCase();
+                if (s.indexOf('5.1') !== -1) badges.push('5.1');
+                else if (s.indexOf('2.0') !== -1) badges.push('2.0');
+                else if (s.indexOf('atmos') !== -1) badges.push('Atmos');
+
+                if (badges.length > 0) {
+                    // Ищем куда вставить (в блок .applecation__info из вашего кода)
+                    var infoBlock = render.find('.applecation__info');
+                    if (infoBlock.length) {
+                        // Удаляем старые, если они были, чтобы не дублировались
+                        render.find('.applecation__quality-badges').remove();
+                        
+                        var badgesHTML = '<div class="applecation__quality-badges">';
+                        for (var i = 0; i < badges.length; i++) {
+                            var b = badges[i];
+                            badgesHTML += b.indexOf('<span') !== -1 ? b : '<span class="apple-badge">' + b + '</span>';
+                        }
+                        badgesHTML += '</div>';
+                        
+                        infoBlock.after(badgesHTML);
+                    }
+                }
+            }, 150);
+        });
+    }
 })();
