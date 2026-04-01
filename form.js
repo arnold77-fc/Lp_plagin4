@@ -7899,69 +7899,49 @@
     } else {
         window.FLIXIO_STUDIOS_ERROR = 'Lampa.Listener not found';
     }
- // Стилизация иконок под Apple TV (вставить в конец файла)
+// Стилизация иконок под Apple TV (версия для старых ТВ)
 (function () {
     try {
-        var appleStyle = `
-            <style id="apple-tv-icons-fix">
-                /* Общие стили для всех плашек качества и звука */
-                .quality-badge, 
-                .applecation__quality-badges div,
-                .card__mark--4k,
-                .card__mark--fhd,
-                .card__mark--hd,
-                .card__mark--hdr,
-                .card__mark--dv,
-                .card__mark--5-1,
-                .card__mark--7-1,
-                .studio-new-badge {
-                    display: inline-flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    background: rgba(255, 255, 255, 0.1) !important; /* Полупрозрачный фон как в Apple TV */
-                    border: 1px solid rgba(255, 255, 255, 0.4) !important; /* Тонкая светлая рамка */
-                    border-radius: 2px !important; /* Легкое закругление */
-                    color: #fff !important;
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-                    font-size: 10px !important; /* Компактный шрифт */
-                    font-weight: 700 !important; /* Жирное начертание */
-                    padding: 1px 4px !important;
-                    margin: 0 4px 4px 0 !important;
-                    text-transform: uppercase !important;
-                    line-height: 1 !important;
-                    height: 15px !important; /* Фиксированная высота */
-                    letter-spacing: 0.5px !important;
-                    vertical-align: middle !important;
-                    box-sizing: border-box !important;
-                }
-
-                /* Контейнер для группы значков */
-                .applecation__quality-badges {
-                    display: inline-flex !important;
-                    flex-wrap: wrap !important;
-                    gap: 2px !important;
-                    vertical-align: middle !important;
-                }
-
-                /* Исправление размера логотипов внутри (например, Dolby Vision) */
-                .quality-badge svg, 
-                .applecation__quality-badges svg,
-                .quality-badge img,
-                .applecation__quality-badges img {
-                    height: 10px !important;
-                    width: auto !important;
-                    display: block !important;
-                    margin: 0 !important;
-                    filter: brightness(100) !important; /* Делаем иконки чисто белыми */
-                }
-
-                /* Особый стиль для метки "NEW" */
-                .studio-new-badge {
-                    background: rgba(255, 255, 255, 0.9) !important;
-                    color: #000 !important;
-                    border: none !important;
-                }
-            </style>`;
+        var appleStyle = '<style id="apple-tv-icons-fix">' +
+            '.quality-badge, .applecation__quality-badges div, .card__mark--4k, .card__mark--fhd, ' +
+            '.card__mark--hd, .card__mark--hdr, .card__mark--dv, .card__mark--5-1, .card__mark--7-1, ' +
+            '.studio-new-badge {' +
+            'display: inline-flex !important;' +
+            'align-items: center !important;' +
+            'justify-content: center !important;' +
+            'background: rgba(255, 255, 255, 0.1) !important;' + /* Полупрозрачный фон */
+            'border: 1px solid rgba(255, 255, 255, 0.35) !important;' + /* Тонкая рамка */
+            'border-radius: 3px !important;' +
+            'color: #fff !important;' +
+            'font-family: -apple-system, system-ui, sans-serif !important;' +
+            'font-size: 10px !important;' +
+            'font-weight: 700 !important;' +
+            'padding: 1px 5px !important;' +
+            'margin: 0 4px 4px 0 !important;' +
+            'text-transform: uppercase !important;' +
+            'line-height: 1.2 !important;' +
+            'height: 16px !important;' +
+            'letter-spacing: 0.5px !important;' +
+            'box-sizing: border-box !important;' +
+            '}' +
+            '.applecation__quality-badges {' +
+            'display: inline-flex !important;' +
+            'flex-wrap: wrap !important;' +
+            'gap: 3px !important;' +
+            '}' +
+            '.quality-badge svg, .applecation__quality-badges svg, .quality-badge img, .applecation__quality-badges img {' +
+            'height: 10px !important;' +
+            'width: auto !important;' +
+            'display: block !important;' +
+            'margin: 0 !important;' +
+            'filter: brightness(1) contrast(1.2) !important;' +
+            '}' +
+            '.studio-new-badge {' +
+            'background: #fff !important;' +
+            'color: #000 !important;' +
+            'border: none !important;' +
+            '}' +
+            '</style>';
 
         if (typeof $ !== 'undefined') {
             $('body').append(appleStyle);
@@ -7971,6 +7951,7 @@
             document.body.appendChild(node);
         }
     } catch (e) {
-        console.log('Apple TV icons style error:', e);
+        console.log('Apple TV icons fix error:', e);
     }
 })();
+ 
