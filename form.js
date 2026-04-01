@@ -7899,123 +7899,82 @@
     } else {
         window.FLIXIO_STUDIOS_ERROR = 'Lampa.Listener not found';
     }
- 
-// =================================================================
-// ПАТЧ: Значки качества в минималистичном стиле Apple TV
+ // =================================================================
+// ПАТЧ: Значки качества в минималистичном стиле Apple TV (Исправленный)
 // =================================================================
 (function() {
-    if (typeof Lampa === 'undefined') return;
+    // Безопасное ожидание загрузки Lampa
+    var checkLampa = setInterval(function() {
+        if (typeof Lampa !== 'undefined' && Lampa.Listener && window.$) {
+            clearInterval(checkLampa);
+            initAppleBadgesPatch();
+        }
+    }, 500);
 
-    // 1. Добавляем CSS для новых значков
-    var style = document.createElement('style');
-    style.id = 'atv_badges_style';
-    style.innerHTML = `
-        /* Выравниваем контейнер */
-        .applecation__quality-badges {
-            display: inline-flex !important;
-            flex-wrap: wrap;
-            gap: 0.4em !important;
-            margin-left: 0.8em !important;
-            align-items: center;
-        }
-        
-        /* Скрываем старые громоздкие SVG-иконки */
-        .applecation__quality-badges .quality-badge { 
-            display: none !important; 
-        }
-        
-        /* Дизайн новых значков (Apple TV Style) */
-        .atv-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 1.3em;
-            padding: 0 0.35em;
-            border: 1px solid rgba(255, 255, 255, 0.35); /* Тонкая полупрозрачная рамка */
-            border-radius: 0.2em; /* Слегка скругленные углы */
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-size: 0.85em;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.8);
-            letter-spacing: 0.03em;
-            line-height: 1;
-            text-transform: uppercase;
-            background: transparent;
-            box-shadow: none;
-            backdrop-filter: blur(5px);
-        }
-        
-        /* Выделяем Dolby Vision чуть более яркой рамкой */
-        .atv-badge--dv {
-            border-color: rgba(255, 255, 255, 0.6);
-            color: #fff;
-        }
-    `;
-    document.head.appendChild(style);
+    function initAppleBadgesPatch() {
+        // 1. Добавляем стили
+        var style = document.createElement('style');
+        style.id = 'atv_badges_style_safe';
+        style.innerHTML = 
+            '.applecation__quality-badges { display: inline-flex !important; flex-wrap: wrap; gap: 0.4em !important; margin-left: 0.8em !important; align-items: center; }' +
+            '.applecation__quality-badges .quality-badge { display: none !important; }' + // Скрываем оригинальные SVG
+            '.atv-custom-badge { display: inline-flex; align-items: center; justify-content: center; height: 1.4em; padding: 0 0.4em; border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 0.3em; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 0.85em; font-weight: 600; color: rgba(255, 255, 255, 0.9); letter-spacing: 0.03em; line-height: 1; text-transform: uppercase; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); }' +
+            '.atv-custom-badge--dv { border-color: rgba(255, 255, 255, 0.8); color: #fff; }';
+        document.head.appendChild(style);
 
-    // 2. Функция генерации новых бейджей на основе распарсенных данных
-    function applyAppleTvBadges(target, info) {
-        if (!info) return;
-        var html = [];
-        
-        // Качество видео (Apple TV объединяет 1080p и 720p под общим шильдиком HD)
-        if (info.quality) {
-            var q = info.quality;
-            if (q === 'FULL HD' || q === '1080p' || q === '720p') q = 'HD';
-            if (q !== 'SD' && q !== '') {
-                html.push('<div class="atv-badge">' + q + '</div>');
-            }
-        }
-        
-        // HDR / Dolby Vision
-        if (info.dv) {
-            html.push('<div class="atv-badge atv-badge--dv">Dolby Vision</div>');
-        } else if (info.hdr) {
-            html.push('<div class="atv-badge">' + (info.hdr_type || 'HDR') + '</div>');
-        }
-        
-        // Звук
-        if (info.sound) {
-            html.push('<div class="atv-badge">' + info.sound + '</div>');
-        }
-        
-        // Дублированный перевод
-        if (info.dub) {
-            html.push('<div class="atv-badge">DUB</div>');
-        }
-        
-        if (html.length > 0) {
-            target.find('.atv-badge').remove(); // очищаем от дублей
-            target.append(html.join(''));
-            target.addClass('show');
-        }
-    }
+        // 2. Отслеживаем открытие карточки
+        Lampa.Listener.follow('full', function(e) {
+            if (e.type !== 'complite') return;
+            
+            var activity = e.object && e.object.activity;
+            if (!activity || !activity.render) return;
+            
+            var render = activity.render();
+            var movie = e.data && e.data.movie;
+            if (!render || !movie) return;
 
-    // 3. Отслеживаем открытие карточки и ждем данных от Lampa.Parser
-    Lampa.Listener.follow('full', function (e) {
-        if (e.type !== 'complite') return;
-        
-        var render = e.object && e.object.activity && e.object.activity.render && e.object.activity.render();
-        var movie = e.data && e.data.movie;
-        if (!render || !movie) return;
-
-        var attempts = 0;
-        var interval = setInterval(function() {
-            var target = render.find('.applecation__quality-badges');
-            if (!target.length) {
+            // 3. Ждем, пока оригинальный код спарсит качество
+            var attempts = 0;
+            var timer = setInterval(function() {
                 attempts++;
-                if (attempts > 50) clearInterval(interval); // Ждем максимум 5 секунд
-                return;
-            }
-
-            // Как только оригинальный скрипт закончит парсинг торрентов и запишет объект applecation_quality:
-            if (movie.applecation_quality) {
-                clearInterval(interval);
-                // Даем небольшую задержку, чтобы старые элементы отрендерились, и перекрываем их
-                setTimeout(function() {
-                    applyAppleTvBadges(target, movie.applecation_quality);
-                }, 50);
-            }
-        }, 100);
-    });
+                if (attempts > 50) { // Если за 10 сек ничего не пришло, сдаемся
+                    clearInterval(timer);
+                    return;
+                }
+                
+                var target = render.find('.applecation__quality-badges');
+                if (target.length && movie.applecation_quality) {
+                    clearInterval(timer);
+                    
+                    // Удаляем наши старые бейджи (защита от дублирования)
+                    target.find('.atv-custom-badge').remove();
+                    
+                    var info = movie.applecation_quality;
+                    var html = [];
+                    
+                    // Собираем новые стильные бейджи
+                    if (info.quality) {
+                        var q = info.quality;
+                        if (q === 'FULL HD' || q === '1080p' || q === '720p') q = 'HD';
+                        if (q !== 'SD' && q !== '') html.push('<div class="atv-custom-badge">' + q + '</div>');
+                    }
+                    if (info.dv) {
+                        html.push('<div class="atv-custom-badge atv-custom-badge--dv">Dolby Vision</div>');
+                    } else if (info.hdr) {
+                        html.push('<div class="atv-custom-badge">' + (info.hdr_type || 'HDR') + '</div>');
+                    }
+                    if (info.sound) {
+                        html.push('<div class="atv-custom-badge">' + info.sound + '</div>');
+                    }
+                    if (info.dub) {
+                        html.push('<div class="atv-custom-badge">DUB</div>');
+                    }
+                    
+                    // Добавляем в DOM
+                    target.append(html.join(''));
+                    target.addClass('show');
+                }
+            }, 200);
+        });
+    }
 })();
