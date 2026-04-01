@@ -7899,27 +7899,20 @@
     } else {
         window.FLIXIO_STUDIOS_ERROR = 'Lampa.Listener not found';
     }
- 
-// =================================================================
-// APPLE TV QUALITY BADGES (COMPATIBLE VERSION)
-// =================================================================
+// ВСТАВИТЬ СТРОГО В САМЫЙ КОНЕЦ ФАЙЛА
 (function () {
-    // 1. Добавляем стили (CSS)
-    var styleId = 'apple-tv-badges-style';
-    if (!document.getElementById(styleId)) {
-        var styleTag = document.createElement('style');
-        styleTag.id = styleId;
-        styleTag.innerHTML = 
-            '.applecation__quality-badges { display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap; }' +
-            '.apple-badge { font-family: -apple-system, system-ui, sans-serif; font-size: 11px; font-weight: 700; ' +
-            'padding: 1px 5px; border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 4px; ' +
-            'color: rgba(255, 255, 255, 0.8); text-transform: uppercase; line-height: 1.2; display: inline-block; }' +
-            '.apple-badge--gold { color: #d4af37; border-color: #d4af37; }';
-        document.body.appendChild(styleTag);
-    }
+    var addAppleBadges = function() {
+        // 1. Создаем стили (максимально простая строка для Android 4.4+)
+        if (!$('#apple-tv-style').length) {
+            $('body').append('<style id="apple-tv-style">' +
+                '.apple-badges-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; opacity: 0; transition: opacity 0.3s; }' +
+                '.apple-badges-list.show { opacity: 1; }' +
+                '.ap-bdg { font-family: sans-serif; font-size: 10px; font-weight: bold; padding: 1px 4px; border: 1px solid rgba(255,255,255,0.4); border-radius: 3px; color: rgba(255,255,255,0.7); text-transform: uppercase; }' +
+                '.ap-bdg-gold { color: #d4af37; border-color: #d4af37; }' +
+            '</style>');
+        }
 
-    // 2. Слушатель событий Lampa
-    if (window.Lampa && Lampa.Listener) {
+        // 2. Подписываемся на событие Lampa
         Lampa.Listener.follow('full', function (e) {
             if (e.type !== 'complite') return;
 
@@ -7928,46 +7921,54 @@
             
             if (!render || !movie) return;
 
-            // Используем тайм-аут, чтобы основной код успел отрисовать свои блоки
+            // Задержка для Android, чтобы DOM успел прогрузиться
             setTimeout(function () {
                 var badges = [];
-                
-                // Проверка Качества
-                var q = (movie.quality_label || '').toString().toLowerCase();
-                if (q.indexOf('4k') !== -1 || q.indexOf('2160') !== -1) badges.push('4K');
-                else if (q.indexOf('1080') !== -1) badges.push('HD');
+                var quality = (movie.quality_label || '').toString().toUpperCase();
+                var sound = (movie.sound_label || movie.audio || '').toString().toUpperCase();
 
-                // Проверка HDR / Dolby Vision
-                if (movie.dv || q.indexOf('dv') !== -1 || q.indexOf('vision') !== -1) {
-                    badges.push('<span class="apple-badge apple-badge--gold">DV</span>');
-                } else if (movie.hdr || q.indexOf('hdr') !== -1) {
+                // 4K / HD
+                if (quality.indexOf('4K') !== -1 || quality.indexOf('2160') !== -1) badges.push('4K');
+                else if (quality.indexOf('1080') !== -1) badges.push('HD');
+
+                // HDR / DV
+                if (movie.dv || quality.indexOf('DV') !== -1 || quality.indexOf('VISION') !== -1) {
+                    badges.push('<span class="ap-bdg ap-bdg-gold">DV</span>');
+                } else if (movie.hdr || quality.indexOf('HDR') !== -1) {
                     badges.push('HDR');
                 }
 
-                // Проверка Звука
-                var s = (movie.sound_label || movie.audio || '').toString().toLowerCase();
-                if (s.indexOf('5.1') !== -1) badges.push('5.1');
-                else if (s.indexOf('2.0') !== -1) badges.push('2.0');
-                else if (s.indexOf('atmos') !== -1) badges.push('Atmos');
+                // Audio
+                if (sound.indexOf('5.1') !== -1) badges.push('5.1');
+                else if (sound.indexOf('2.0') !== -1) badges.push('2.0');
+                else if (sound.indexOf('ATMOS') !== -1) badges.push('Atmos');
 
                 if (badges.length > 0) {
-                    // Ищем куда вставить (в блок .applecation__info из вашего кода)
-                    var infoBlock = render.find('.applecation__info');
-                    if (infoBlock.length) {
-                        // Удаляем старые, если они были, чтобы не дублировались
-                        render.find('.applecation__quality-badges').remove();
+                    // Ищем блок applecation__info (он есть в вашем коде)
+                    var target = render.find('.applecation__info');
+                    if (target.length) {
+                        render.find('.apple-badges-list').remove(); // Чистим дубли
                         
-                        var badgesHTML = '<div class="applecation__quality-badges">';
+                        var html = '<div class="apple-badges-list">';
                         for (var i = 0; i < badges.length; i++) {
                             var b = badges[i];
-                            badgesHTML += b.indexOf('<span') !== -1 ? b : '<span class="apple-badge">' + b + '</span>';
+                            html += (b.indexOf('<span') !== -1) ? b : '<span class="ap-bdg">' + b + '</span>';
                         }
-                        badgesHTML += '</div>';
+                        html += '</div>';
                         
-                        infoBlock.after(badgesHTML);
+                        target.append(html);
+                        setTimeout(function() { render.find('.apple-badges-list').addClass('show'); }, 10);
                     }
                 }
-            }, 150);
+            }, 200);
+        });
+    };
+
+    // Ожидание инициализации Lampa
+    if (window.Lampa) addAppleBadges();
+    else {
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Lampa) addAppleBadges();
         });
     }
-})();
+})(); 
